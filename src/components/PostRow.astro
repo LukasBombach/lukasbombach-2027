@@ -1,0 +1,36 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, postUrl } from '../lib/posts';
+interface Props { post: CollectionEntry<'blog'>; }
+const { post } = Astro.props;
+const { title, description, date, externalUrl, source, gallery, preview } = post.data;
+const href = postUrl(post);
+---
+<li class="flex flex-col gap-[24.7px]">
+  <article class="timeline-row" aria-labelledby={`title-${post.id}`}>
+    <time class="text-muted" datetime={date.toISOString()}>{formatDate(date)}</time>
+    <div class="min-w-0">
+      <h3 id={`title-${post.id}`} class="text-[14px] leading-[1.8]">
+        <a href={href} target={externalUrl ? '_blank' : undefined} rel={externalUrl ? 'noopener noreferrer' : undefined} class="inline text-ink min-[648px]:whitespace-nowrap">
+          {title}{source && ` – on ${source}`}{externalUrl && <><span aria-hidden="true"> </span><img src="/images/external-link.svg" alt="" class="external-icon inline-block align-top" width="14" height="17" /><span class="sr-only"> (opens in a new tab)</span></>}
+        </a>
+      </h3>
+      <p>{description}</p>
+    </div>
+  </article>
+  {gallery.length > 0 && <div class="grid grid-cols-3 gap-[10px] pl-[130px] max-[540px]:pl-0">
+    {gallery.map((image, i) => <a href={href} aria-label={`${title} — image ${i + 1}`} class="overflow-hidden rounded-lg border border-line">
+      <Image src={image.src} alt={image.alt} width={300} height={180} fit="cover" class="aspect-[5/3] h-auto w-full object-cover" loading="lazy" />
+    </a>)}
+  </div>}
+  {preview && <div class="pl-[130px] max-[540px]:pl-0">
+    <a href={href} target={externalUrl ? '_blank' : undefined} rel={externalUrl ? 'noopener noreferrer' : undefined} class="flex h-[90px] overflow-hidden rounded-lg border border-line hover:bg-soft" aria-label={`Read ${title}${externalUrl ? ' (opens in a new tab)' : ''}`}>
+      <Image src={preview.image} alt={preview.alt} width={304} height={180} fit="cover" class="h-full w-[152px] shrink-0 object-cover max-[400px]:w-[110px]" loading="lazy" />
+      <div class="flex min-w-0 flex-col justify-center px-5 max-[400px]:px-3">
+        <p class="truncate text-ink">{preview.title}</p>
+        <p class="text-muted">{preview.readingTime}</p>
+      </div>
+    </a>
+  </div>}
+</li>

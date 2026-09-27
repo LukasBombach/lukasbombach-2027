@@ -1,0 +1,18 @@
+---
+import { profile } from '../data/profile';
+---
+<footer class="mt-[58px] flex flex-col gap-[58px]">
+  <section aria-labelledby="contact-title">
+    <h2 id="contact-title" class="section-title mb-[23px]">Contact</h2>
+    <dl class="flex flex-col gap-[10px]">
+      {profile.contacts.map(contact => <div class="timeline-row contact-row">
+        <dt class="text-muted">{contact.label}</dt>
+        <dd class="min-w-0 break-words text-ink">{contact.url ? <a href={contact.url} rel="me">{contact.text}</a> : contact.text}</dd>
+      </div>)}
+    </dl>
+  </section>
+  <section aria-labelledby="credits-title">
+    <h2 id="credits-title" class="section-title mb-1">Credits</h2>
+    <p>Design by Figma read.cv template</p>
+  </section>
+</footer>

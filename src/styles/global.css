@@ -1,0 +1,69 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', sans-serif;
+  --color-page: #ffffff;
+  --color-ink: #111111;
+  --color-copy: #555555;
+  --color-muted: #6d6d6d;
+  --color-soft: #f6f6f6;
+  --color-line: #e5e5e5;
+}
+
+:root { color-scheme: light dark; }
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-page: #171717;
+    --color-ink: #eeeeee;
+    --color-copy: #b7b7b7;
+    --color-muted: #a3a3a3;
+    --color-soft: #262626;
+    --color-line: #383838;
+  }
+  .external-icon { filter: invert(1); }
+}
+
+@layer base {
+  body { @apply bg-page font-sans text-[14px] font-normal leading-[1.8] text-copy antialiased; }
+  h1, h2, h3 { @apply font-normal text-ink; }
+  a { text-underline-offset: 4px; }
+  a:hover { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 5px; border-radius: 3px; }
+  ::selection { background: var(--color-ink); color: var(--color-page); }
+}
+
+.page-shell { @apply mx-auto w-full max-w-[648px] px-6 pt-[82px] pb-[82px]; }
+.section-title { @apply text-[14px] leading-[1.4] text-ink; }
+.timeline-row { @apply grid grid-cols-[130px_minmax(0,1fr)]; }
+.external-icon { width: 14px; height: 17px; flex-shrink: 0; }
+.skip-link { @apply fixed top-4 left-4 z-10 -translate-y-24 rounded bg-ink px-4 py-2 text-page focus:translate-y-0; }
+
+.prose { @apply text-[16px] leading-[1.9]; overflow-wrap: anywhere; }
+.prose > * + * { margin-top: 1.4em; }
+.prose h2 { @apply mt-10 text-[21px] leading-[1.4]; }
+.prose h3 { @apply mt-8 text-[18px] leading-[1.4]; }
+.prose a { @apply text-ink underline; }
+.prose ul, .prose ol { padding-left: 1.4em; }
+.prose ul { list-style: disc; }
+.prose ol { list-style: decimal; }
+.prose li + li { margin-top: .35em; }
+.prose blockquote { @apply border-l-2 border-line pl-5 text-muted; }
+.prose img { @apply h-auto max-w-full rounded-lg; }
+.prose :not(pre) > code { @apply rounded bg-soft px-1.5 py-0.5 text-[0.85em] text-ink; }
+.prose pre { @apply overflow-x-auto rounded-lg border border-line bg-soft p-5 text-[13px] leading-[1.7]; }
+.prose pre code { white-space: pre; }
+.prose table { display: block; max-width: 100%; overflow-x: auto; border-collapse: collapse; }
+.prose th, .prose td { border-bottom: 1px solid var(--color-line); padding: .5em 1em; text-align: left; }
+.prose hr { @apply my-8 border-line; }
+.astro-code, .astro-code span { color: var(--shiki-light); background-color: var(--shiki-light-bg); }
+@media (prefers-color-scheme: dark) {
+  .astro-code, .astro-code span { color: var(--shiki-dark); background-color: var(--shiki-dark-bg); }
+}
+@media (max-width: 540px) {
+  .page-shell { padding-top: 40px; padding-bottom: 40px; }
+  .timeline-row { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .contact-row { grid-template-columns: 100px minmax(0, 1fr); gap: 0; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  a { transition: color 150ms ease; }
+}

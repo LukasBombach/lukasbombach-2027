@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Profile from '../components/Profile.astro';
+import PostRow from '../components/PostRow.astro';
+import Footer from '../components/Footer.astro';
+import { profile } from '../data/profile';
+import { getPublishedPosts } from '../lib/posts';
+const posts = await getPublishedPosts();
+---
+<Base>
+  <Profile home />
+  <main id="main" tabindex="-1" class="mt-[55px] flex flex-col gap-[58px]">
+    <section aria-labelledby="about-title">
+      <h2 id="about-title" class="section-title mb-1">About</h2>
+      <p>{profile.about}</p>
+    </section>
+    <section aria-labelledby="writing-title">
+      <h2 id="writing-title" class="section-title mb-[24.7px]">Writing</h2>
+      {posts.length ? <ul class="flex flex-col gap-[24.7px]" role="list">{posts.map(post => <PostRow post={post} />)}</ul> : <p>New writing is on its way.</p>}
+    </section>
+  </main>
+  <Footer />
+</Base>

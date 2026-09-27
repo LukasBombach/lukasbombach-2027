@@ -1,0 +1,35 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import type { GetStaticPaths } from 'astro';
+import Base from '../../layouts/Base.astro';
+import Profile from '../../components/Profile.astro';
+import { getPublishedPosts, formatDate } from '../../lib/posts';
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts();
+  return posts.filter(post => !post.data.externalUrl).map(post => ({ params: { id: post.id }, props: { post } }));
+}) satisfies GetStaticPaths;
+interface Props { post: CollectionEntry<'blog'>; }
+const { post } = Astro.props;
+const { Content } = await render(post);
+const words = post.body?.trim().split(/\s+/).length ?? 0;
+const minutes = Math.max(1, Math.ceil(words / 200));
+const german = post.data.lang === 'de';
+---
+<Base title={post.data.title} description={post.data.description} lang={post.data.lang} article publishedAt={post.data.date}>
+  <Profile />
+  <main id="main" tabindex="-1" class="mt-[55px]">
+    <a href="/" class="text-muted">{german ? '← Alle Beiträge' : '← All writing'}</a>
+    <article class="mt-8">
+      <header class="mb-8">
+        <div class="mb-3 flex flex-wrap gap-x-3 text-muted">
+          <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
+          <span aria-hidden="true">·</span>
+          <span>{minutes} {german ? 'Min. Lesezeit' : 'min read'}</span>
+        </div>
+        <h1 class="text-[28px] leading-[1.35] tracking-[-0.025em] sm:text-[32px]">{post.data.title}</h1>
+      </header>
+      <div class="prose"><Content /></div>
+    </article>
+  </main>
+  <footer class="mt-[58px] border-t border-line pt-6"><a href="/" class="text-ink">{german ? '← Zurück zur Startseite' : '← Back to home'}</a><a href="/rss.xml" class="float-right text-muted">RSS</a></footer>
+</Base>

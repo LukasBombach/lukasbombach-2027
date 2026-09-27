@@ -1,0 +1,12 @@
+---
+import Base from '../layouts/Base.astro';
+import Profile from '../components/Profile.astro';
+---
+<Base title="Page not found" noindex>
+  <Profile />
+  <main id="main" tabindex="-1" class="mt-[55px]">
+    <p class="text-muted">404</p>
+    <h1 class="mt-2 text-[24px]">This page could not be found.</h1>
+    <a href="/" class="mt-6 inline-block text-ink">← Back to home</a>
+  </main>
+</Base>

@@ -1,0 +1,16 @@
+---
+import { Image } from 'astro:assets';
+import portrait from '../assets/lukas-bombach.png';
+import { profile } from '../data/profile';
+const { home = false } = Astro.props;
+---
+<header class="flex min-h-[93px] items-center gap-4">
+  <a href="/" aria-label="Lukas Bombach — home" class="shrink-0 rounded-full">
+    <Image src={portrait} alt="Lukas Bombach" width={184} height={186} fit="cover" class="h-[93px] w-[92px] rounded-full object-cover max-[360px]:h-[76px] max-[360px]:w-[76px]" loading="eager" fetchpriority="high" />
+  </a>
+  <div class="min-w-0">
+    {home ? <h1 class="text-[20px] leading-[26px]">{profile.name}</h1> : <a href="/" class="text-[20px] leading-[26px] text-ink">{profile.name}</a>}
+    <p class="mt-[1px]">{profile.tagline}</p>
+    <a href={profile.github} class="mt-[3px] inline-flex min-h-6 items-center rounded-full bg-soft px-[10px] text-[12px] leading-none text-copy max-[360px]:text-[11px]">github.com/LukasBombach</a>
+  </div>
+</header>
