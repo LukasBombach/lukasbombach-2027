@@ -28,7 +28,7 @@ const href = postUrl(post);
     <a href={href} target={externalUrl ? '_blank' : undefined} rel={externalUrl ? 'noopener noreferrer' : undefined} class="flex h-[90px] overflow-hidden rounded-lg border border-line hover:bg-soft" aria-label={`Read ${title}${externalUrl ? ' (opens in a new tab)' : ''}`}>
       <Image src={preview.image} alt={preview.alt} width={304} height={180} fit="cover" class="h-full w-[152px] shrink-0 object-cover max-[400px]:w-[110px]" loading="lazy" />
       <div class="flex min-w-0 flex-col justify-center px-5 max-[400px]:px-3">
-        <p class="truncate text-ink">{preview.title}</p>
+        <p class="line-clamp-2 text-ink leading-[1.4]">{preview.title}</p>
         <p class="text-muted">{preview.readingTime}</p>
       </div>
     </a>

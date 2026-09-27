@@ -35,7 +35,7 @@ Markdown unterstützt Links, Bilder, Listen und Codeblöcke.
 
 Die Datei erscheint automatisch unter `/blog/mein-neuer-beitrag/`, auf der Startseite (neueste zuerst) und im RSS-Feed `/rss.xml`. Titel und Beschreibung sind Pflichtfelder. `lang` ist optional und standardmäßig `en`. Mit `draft: true` bleibt der Beitrag vollständig aus dem Build ausgeschlossen. Beiträge mit einem zukünftigen Datum erscheinen erst bei einem Build nach diesem Datum; die statische Website braucht dafür ein erneutes Deployment.
 
-`mein-erster-beitrag.md` ist eine vorbereitete deutsche Entwurfsvorlage. Der sichtbare Beitrag „Syntax highlighting…“, die Lorem-ipsum-Texte und Vorschaukarten sind Demonstrationsinhalte aus dem Design und müssen vor der Veröffentlichung durch deine Inhalte ersetzt werden. Die zwei älteren Beiträge verlinken auf deine Originalartikel.
+`mein-erster-beitrag.md` ist eine vorbereitete deutsche Entwurfsvorlage. Der sichtbare Beitrag „Syntax highlighting…“ und dessen Lorem-ipsum-Beschreibung sind Demonstrationsinhalte aus dem Design und müssen vor der Veröffentlichung durch deine Inhalte ersetzt werden. Die zwei älteren Beiträge verlinken auf deine Originalartikel und enthalten passende englische Beschreibungen sowie die Titelbilder und Lesezeiten der Originalseiten.
 
 ### Bilder und externe Artikel
 
