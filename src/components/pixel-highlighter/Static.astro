@@ -1,0 +1,8 @@
+---
+import { serverBackground } from '../../lib/pixel-highlighter/server';
+import { sample } from '../../lib/pixel-highlighter/raster';
+import './pixel.css';
+const { source = sample } = Astro.props;
+const { image, size } = serverBackground(source);
+---
+<pre class="pixel-shell" aria-label="Beim Build hervorgehobener JavaScript-Code"><code class="pixel-text" data-ready style={`--pixel-image:url(${image});--pixel-size:${size}`}>{source}</code></pre>

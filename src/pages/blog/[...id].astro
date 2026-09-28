@@ -1,11 +1,11 @@
 ---
-import { render, type CollectionEntry } from 'astro:content';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
 import type { GetStaticPaths } from 'astro';
 import Base from '../../layouts/Base.astro';
 import Profile from '../../components/Profile.astro';
 import { getPublishedPosts, formatDate } from '../../lib/posts';
 export const getStaticPaths = (async () => {
-  const posts = await getPublishedPosts();
+  const posts = import.meta.env.DEV ? await getCollection('blog') : await getPublishedPosts();
   return posts.filter(post => !post.data.externalUrl).map(post => ({ params: { id: post.id }, props: { post } }));
 }) satisfies GetStaticPaths;
 interface Props { post: CollectionEntry<'blog'>; }
@@ -21,6 +21,7 @@ const german = post.data.lang === 'de';
     <a href="/" class="text-muted">{german ? '← Alle Beiträge' : '← All writing'}</a>
     <article class="mt-8">
       <header class="mb-8">
+        {post.data.draft && <p class="mb-4 text-muted">Entwurf · nur in der lokalen Vorschau sichtbar</p>}
         <div class="mb-3 flex flex-wrap gap-x-3 text-muted">
           <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
           <span aria-hidden="true">·</span>

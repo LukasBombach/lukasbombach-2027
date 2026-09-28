@@ -1,0 +1,32 @@
+---
+import { sample } from '../../lib/pixel-highlighter/raster';
+import './pixel.css';
+---
+<figure class="pixel-demo" data-browser-demo>
+  <figcaption>Das Farbraster, vergrößert — darunter derselbe Hintergrund auf Text zugeschnitten.</figcaption>
+  <div class="pixel-map" role="img" aria-label="Farbraster: eine Spalte pro Zeichen, eine Reihe pro Codezeile"></div>
+  <pre class="pixel-shell"><code class="pixel-text">{sample}</code></pre>
+  <p class="pixel-status" aria-live="polite">Ohne JavaScript bleibt der Quelltext lesbar.</p>
+</figure>
+<script>
+  import { browserBackground } from '../../lib/pixel-highlighter/browser';
+  async function renderDemo(root: HTMLElement) {
+    const code = root.querySelector<HTMLElement>('code')!;
+    const map = root.querySelector<HTMLElement>('.pixel-map')!;
+    const status = root.querySelector<HTMLElement>('.pixel-status')!;
+    try {
+      const result = browserBackground(code.textContent ?? '');
+      const image = new Image();
+      image.src = result.image;
+      await image.decode();
+      code.style.setProperty('--pixel-image', `url(${result.image})`);
+      code.style.setProperty('--pixel-size', result.size);
+      code.dataset.ready = '';
+      map.style.backgroundImage = `url(${result.image})`;
+      status.textContent = `${result.width} × ${result.height} Pixel · 2 Elemente für den Codeblock · 0 Token-Spans`;
+    } catch {
+      status.textContent = 'Das Bild konnte nicht erzeugt werden. Der Quelltext bleibt lesbar.';
+    }
+  }
+  document.querySelectorAll<HTMLElement>('[data-browser-demo]').forEach(renderDemo);
+</script>

@@ -1,0 +1,163 @@
+---
+title: Syntax-Highlighting mit nur zwei Elementen
+description: Was passiert, wenn die Farben von Code in einem winzigen Bild stecken? Ein Experiment mit echtem Text, wenig DOM und Highlighting ohne JavaScript beim Leser.
+date: 2026-09-28
+lang: de
+draft: true
+---
+
+import { Code } from 'astro:components';
+import BrowserDemo from '../../components/pixel-highlighter/Browser.astro';
+import EditorDemo from '../../components/pixel-highlighter/Editor.astro';
+import StaticDemo from '../../components/pixel-highlighter/Static.astro';
+import browserSource from '../../lib/pixel-highlighter/browser.ts?raw';
+import serverSource from '../../lib/pixel-highlighter/server.ts?raw';
+import rasterSource from '../../lib/pixel-highlighter/raster.ts?raw';
+import editorSource from '../../components/pixel-highlighter/Editor.astro?raw';
+
+Syntax-Highlighting verändert meistens die Struktur des Codes. Aus einem Text werden Tokens, aus Tokens werden Elemente, und jedes dieser Elemente bekommt eine Farbe. Das funktioniert gut. Trotzdem interessiert mich eine Frage: Brauchen wir für diese Farben tatsächlich all diese Elemente?
+
+Wenn ich Code nur darstellen oder ein kleines Textfeld einfärben möchte, brauche ich zunächst keine eigene Box für jedes Keyword. Ich brauche Farbe an der richtigen Stelle.
+
+Mein Ansatz: Ich schreibe die Farben in ein Bild und lege dieses Bild hinter den Text. Der Browser schneidet den Hintergrund auf die Buchstaben zu. Der Code bleibt Text. Die Farben brauchen keine eigenen DOM-Elemente.
+
+Das ist noch kein fertiger Ersatz für einen Editor. Es ist ein Rendering-Experiment mit einer konkreten Anwendung: statische Codeblöcke und kleine editierbare Beispiele. Hier möchte ich zeigen, wie wenig dafür nötig ist — und an welchen Stellen die Einfachheit aufhört.
+
+## 1. Ein Pixel pro Zeichenposition
+
+Bei einer Monospace-Schrift und einfachen ASCII-Zeichen liegt der Code auf einem regelmäßigen Raster. Jede Zeichenposition ist gleich breit, jede Zeile gleich hoch. Dieses Raster können wir für die Farben nutzen.
+
+Nehmen wir diese Zeile:
+
+```js
+const answer = 42;
+```
+
+Das Keyword bekommt fünf violette Pixel, die Zahl zwei orange Pixel. Leerzeichen belegen ebenfalls eine Position. Eine zweite Codezeile wird eine zweite Pixelreihe. Das Bild ist so breit wie die längste Zeile und so hoch wie die Anzahl der Zeilen — nicht so groß wie der sichtbare Codeblock.
+
+Die folgende Demo erzeugt ein PNG im Browser. Oben sieht man das Farbraster stark vergrößert, darunter dasselbe Bild als Textfarbe. Die Farbflächen enthalten selbst keine Buchstaben.
+
+<BrowserDemo />
+
+Der entscheidende Schritt ist CSS:
+
+```css
+code {
+  font-family: monospace;
+  line-height: 1.6;
+  white-space: pre;
+  font-variant-ligatures: none;
+  background-image: url("colors.png");
+  background-size: calc(var(--columns) * 1ch)
+                   calc(var(--lines) * 1.6em);
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  background-clip: text;
+  color: transparent;
+}
+```
+
+`1ch` orientiert sich an der Breite der Ziffer Null. Unter unseren Schriftannahmen entspricht das einer Zeichenposition. Die Bildhöhe folgt exakt der eingestellten Zeilenhöhe. `image-rendering: pixelated` hält die Farbgrenzen beim Vergrößern scharf. Durch [`background-clip: text`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/background-clip) erscheint der Hintergrund nur innerhalb der Buchstaben.
+
+Dieses CSS zeigt das Prinzip. Die eingebetteten Beispiele ergänzen es um einen lesbaren Fallback, eine explizite Schriftkonfiguration und Regeln für Druck und erzwungene Systemfarben.
+
+Für den statischen Codeblock reicht diese Struktur:
+
+```html
+<pre><code>const answer = 42;</code></pre>
+```
+
+Zwei Elemente, unabhängig von der Anzahl der Tokens. Überschriften, Demo-Beschriftungen und das vergrößerte Bild zählen natürlich zusätzlich. „Zwei Elemente“ beschreibt den Codeblock, nicht die ganze Demo. Auch Canvas und Bildobjekt werden beim Erzeugen kurzzeitig angelegt; sie werden nicht in den Dokumentbaum eingefügt.
+
+## Die Tokenisierung bleibt austauschbar
+
+Das Bild weiß nichts über JavaScript. Es braucht nur Zeichenpositionen und Farben. In meinem ursprünglichen Prototyp liefert Shiki die Tokens. Für diesen Artikel verwende ich einen absichtlich kleinen Tokenizer, damit man die Bildgenerierung ohne Highlighter-Konfiguration lesen kann.
+
+Er erkennt einige Keywords, Zahlen, einfache Strings und einzeilige Kommentare. Er versteht kein vollständiges JavaScript: Template Literals, reguläre Ausdrücke und mehrzeilige Kommentare fehlen beispielsweise. Das ist eine Grenze dieses Beispiels, nicht des Bildverfahrens. Ein richtiger Tokenizer kann dieselbe Rendering-Stufe beliefern; dessen Laufzeit und gegebenenfalls Browser-Bundle bleiben dabei bestehen.
+
+<details>
+<summary>Den kleinen Tokenizer und das gemeinsame Farbraster ansehen</summary>
+<Code code={rasterSource} lang="typescript" />
+</details>
+
+Aus diesem Raster macht der Browser ein Bild. Das hier ist der tatsächlich verwendete Renderer:
+
+<Code code={browserSource} lang="typescript" />
+
+Mehr braucht die Bildgenerierung nicht. Optimierungen wie Worker, wiederverwendete Puffer oder inkrementelle Tokenisierung würden erst dann dazukommen, wenn eine Messung sie rechtfertigt.
+
+## 2. Dasselbe Prinzip in einem Textfeld
+
+Ein `textarea` bringt Texteingabe, Auswahl und eine Undo-Historie bereits mit. Wenn sich sein Hintergrund auf den Text zuschneiden lässt, brauchen die Tokens auch hier keine eigenen Elemente.
+
+<EditorDemo />
+
+Probier beispielsweise aus, einen String oder eine Zahl zu ändern. Der Text bleibt im nativen Textfeld; es gibt keine zweite Textebene, die jede Eingabe spiegeln muss. Das Feld hat keinen automatischen Zeilenumbruch. Bei längeren Zeilen und mehr Inhalt muss das Farbbild gemeinsam mit dem Text scrollen; dafür verwendet das Beispiel [`background-attachment: local`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/background-attachment).
+
+Die Aktualisierung folgt einer kurzen Kette:
+
+```text
+Eingabe → Tokens → Farbraster → PNG → Bild dekodieren → Hintergrund ersetzen
+```
+
+Hier wird aus dem CSS-Trick eine kleine Implementierungsaufgabe. Das Bild entsteht synchron, seine Dekodierung kann aber später fertig werden. Währenddessen kann schon die nächste Eingabe angekommen sein. Deshalb bekommt jede Aktualisierung eine Versionsnummer: Nur das Ergebnis der neuesten Eingabe darf sichtbar werden.
+
+Bis die neuen Farben fertig sind, zeigt diese Demo einfarbigen Text. Das kann bei langsamer Verarbeitung sichtbar werden; dafür passen niemals absichtlich alte Farben zu neuem Text. `requestAnimationFrame` fasst ausstehende Arbeit vor dem nächsten Frame zusammen. Während einer IME-Komposition pausiert das Highlighting, ohne die Eingabe umzuschreiben.
+
+Damit ist noch keine browserübergreifende Editor-Bibliothek entstanden. Gerade das Zusammenspiel von Textfeld, Hintergrund, Scrollen und Texteingabemethoden muss auf den Zielbrowsern geprüft werden. Native Eingabe spart eigenen Editor-Code, nimmt uns diese Prüfung aber nicht ab.
+
+<details>
+<summary>Die vollständige Textfeld-Demo ansehen</summary>
+<Code code={editorSource} lang="astro" />
+</details>
+
+## 3. Das Bild vor dem Browser erzeugen
+
+Für einen Artikel ist die interessanteste Variante möglicherweise die einfachste: Der Code steht schon fest. Also kann auch das Farbbild schon feststehen, bevor die Seite ausgeliefert wird.
+
+Die Rasterfunktion bleibt gleich. Statt Canvas kodiert auf dem Server eine PNG-Bibliothek die Pixel:
+
+<Code code={serverSource} lang="typescript" />
+
+Dieser nächste Block wird genau so erzeugt. In diesem Blog geschieht das beim Astro-Build; dieselbe Funktion könnte auch während eines Server-Requests laufen. Für diesen Block wird kein JavaScript im Browser ausgeführt.
+
+<StaticDemo />
+
+Im ausgelieferten HTML stehen der echte Quelltext und das Bild als Data-URL. CSS legt beides übereinander. Die beiden interaktiven Demos weiter oben laden weiterhin JavaScript — die Aussage „ohne JavaScript“ gilt für diesen statischen Block.
+
+Auch spanbasiertes Highlighting lässt sich auf dem Server erzeugen und ohne Browser-JavaScript ausliefern. Der Unterschied dieser Technik liegt im resultierenden DOM und in der Darstellung der Farben. Ebenso brauchen wir weiterhin CSS, nur keine eigene Klasse oder Regel pro Tokenfarbe.
+
+## Was wir damit gewinnen
+
+Die Zahl der Elemente für den Codeblock bleibt konstant. Das reduziert die DOM-Struktur, die angelegt und verwaltet werden muss. In einer Integration bleiben Text und Farbbild getrennt: Das Textfeld enthält seinen Wert, das Bild liefert die Darstellung.
+
+Der Inhalt wird nicht zu einem Screenshot. Er bleibt auswählbarer, kopierbarer Text; im Textfeld bleibt er bearbeitbar. Das ist eine wichtige Eigenschaft des Ansatzes, aber noch kein Nachweis umfassender Barrierefreiheit.
+
+Ein kleines Farbraster lässt sich vorab erzeugen und als Datei auch separat cachen. Die Demo nutzt eine Data-URL, um alles zusammen auszuliefern. Das spart einen Bildrequest, vergrößert aber das HTML und erlaubt kein unabhängiges Caching des Bildes.
+
+## Wo das Raster an seine Grenzen kommt
+
+**Zeichen sind nicht automatisch Spalten.** JavaScripts `string.length` zählt UTF-16-Codeeinheiten, keine sichtbaren Zellen. Emoji, kombinierende Zeichen, breite CJK-Zeichen und Tabs passen nicht in die naive Gleichung „ein Zeichen = ein Pixel“. Die kleine Demo akzeptiert deshalb nur druckbares ASCII und Zeilenumbrüche. Bei anderen Eingaben zeigt sie den unveränderten Text einfarbig. Eine produktive Version braucht eine ausdrückliche Strategie für Spaltenbreiten und Schrift-Fallbacks.
+
+**Die Geometrie muss stimmen.** Schriftart, Zeichenabstand, Zeilenhöhe, Padding und Bildposition müssen zusammenpassen. Automatischer Zeilenumbruch würde zusätzliche Bildzeilen erfordern. Ligaturen und abweichende Schriftstile können die Zuordnung ebenfalls stören. Hier sind Ligaturen deaktiviert und alle Tokens gleich gesetzt.
+
+**Ein Bild liefert Farbe, keine Token-Elemente.** Individuelle Schriftstärken, kursive Tokens, Links oder Tooltips ergeben sich daraus nicht. Für Interaktion pro Token müssten wir Positionen separat bestimmen oder wieder DOM hinzufügen. Auch ein Theme-Wechsel benötigt ein passendes neues Bild.
+
+**Lesbarkeit braucht einen Fallback.** Transparenter Text darf bei fehlenden Bildern nicht verschwinden. Die Beispiele legen deshalb eine einfarbige Hintergrundschicht unter das Farbbild und aktivieren Transparenz nur mit CSS-Unterstützung. Druck und Forced-Colors-Modus bekommen normale Textfarben. Bildblockierung, Auswahl, Zoom und Assistenztechnologien gehören trotzdem in die reale Prüfung.
+
+**Klein im DOM heißt nicht automatisch billig.** Der Pixelpuffer belegt hier `Breite × Zeilen × 4` Bytes, bevor PNG-Kompression greift. Eine einzige extrem lange Zeile verbreitert das gesamte Bild. Bei jeder Eingabe tokenisiert diese Version den vollständigen Text erneut und kodiert ein neues PNG. Deshalb begrenzt die Demo das Raster auf 512 Spalten und 100 Zeilen und wechselt darüber zu einfachem Text.
+
+## Was ich vor einem Performance-Versprechen messen möchte
+
+Die konstante Elementanzahl lässt sich direkt überprüfen. Ob sich die Technik schneller anfühlt, hängt dagegen vom gesamten Ablauf ab: Tokenisierung, Bildkodierung, Dekodierung und Paint verschwinden nicht mit den Spans.
+
+Ein sinnvoller Vergleich verwendet denselben Code, Tokenizer, Font und dieselben Farben für beide Renderer. Ich möchte dabei getrennt betrachten:
+
+- Statische Blöcke: komprimierte Übertragungsgröße, Zeit bis zur farbigen Darstellung und Speicherverbrauch.
+- Editierbare Blöcke: Latenz von Eingabe bis zur passenden Farbe, insbesondere langsame Ausreißer.
+- Unterschiedliche Formen von Code: viele kurze Zeilen, einzelne lange Zeilen und mehrere Blöcke auf einer Seite.
+- Chromium, Firefox und Safari: Darstellung, horizontales und vertikales Scrollen, Zoom, Auswahl und Eingabeverhalten.
+
+Solche Ergebnisse liegen für diesen Entwurf noch nicht vor. Weniger Elemente sind die Eigenschaft der Technik; bessere Gesamtperformance ist die Hypothese, die daraus erst noch folgen muss.
+
+Für kleine, kontrollierte Beispiele scheint mir der Ansatz interessant genug, um ihn weiterzuverfolgen. Der nächste Schritt ist, die Grenzen genauer zu vermessen: Wo genügt dieses einfache Farbraster bereits, und ab wann kostet seine korrekte Ausrichtung mehr, als das eingesparte DOM einbringt?

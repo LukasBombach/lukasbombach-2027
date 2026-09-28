@@ -1,0 +1,44 @@
+---
+import { sample } from '../../lib/pixel-highlighter/raster';
+import './pixel.css';
+---
+<div class="pixel-demo" data-editor-demo>
+  <label for="pixel-editor">JavaScript ausprobieren · kleiner Demo-Tokenizer</label>
+  <div class="pixel-shell"><textarea id="pixel-editor" class="pixel-text" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="pixel-editor-status">{sample}</textarea></div>
+  <p id="pixel-editor-status" class="pixel-status" aria-live="polite">JavaScript lädt die Farben. Das Textfeld ist auch ohne JavaScript benutzbar.</p>
+</div>
+<script>
+  import { browserBackground } from '../../lib/pixel-highlighter/browser';
+  const editor = document.querySelector<HTMLTextAreaElement>('#pixel-editor')!;
+  const status = document.querySelector<HTMLElement>('#pixel-editor-status')!;
+  let revision = 0;
+  let frame = 0;
+  let composing = false;
+  async function update(version: number) {
+    try {
+      const result = browserBackground(editor.value);
+      const image = new Image();
+      image.src = result.image;
+      await image.decode();
+      if (version !== revision) return; // A newer input must win.
+      editor.style.setProperty('--pixel-image', `url(${result.image})`);
+      editor.style.setProperty('--pixel-size', result.size);
+      editor.dataset.ready = '';
+      status.textContent = 'Farben aktiv · ASCII, keine Tabs · maximal 512 Spalten / 100 Zeilen';
+    } catch (error) {
+      if (version !== revision) return;
+      delete editor.dataset.ready;
+      status.textContent = `${error instanceof Error ? error.message : 'Bild nicht verfügbar.'} Text bleibt bearbeitbar und einfarbig.`;
+    }
+  }
+  function schedule() {
+    const version = ++revision;
+    delete editor.dataset.ready; // Old colors no longer match the new text.
+    cancelAnimationFrame(frame);
+    if (!composing) frame = requestAnimationFrame(() => { void update(version); });
+  }
+  editor.addEventListener('input', schedule);
+  editor.addEventListener('compositionstart', () => { composing = true; schedule(); });
+  editor.addEventListener('compositionend', () => { composing = false; schedule(); });
+  schedule();
+</script>
