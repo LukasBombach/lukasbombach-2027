@@ -5,4 +5,4 @@ import './pixel.css';
 const { source = sample } = Astro.props;
 const { image, size } = serverBackground(source);
 ---
-<pre class="pixel-shell" aria-label="Beim Build hervorgehobener JavaScript-Code"><code class="pixel-text" data-ready style={`--pixel-image:url(${image});--pixel-size:${size}`}>{source}</code></pre>
+<pre class="pixel-shell" aria-label="JavaScript highlighted at build time"><code class="pixel-text" data-ready style={`--pixel-image:url(${image});--pixel-size:${size}`}>{source}</code></pre>

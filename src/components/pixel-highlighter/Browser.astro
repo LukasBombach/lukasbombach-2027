@@ -3,10 +3,10 @@ import { sample } from '../../lib/pixel-highlighter/raster';
 import './pixel.css';
 ---
 <figure class="pixel-demo" data-browser-demo>
-  <figcaption>Das Farbraster, vergrößert — darunter derselbe Hintergrund auf Text zugeschnitten.</figcaption>
-  <div class="pixel-map" role="img" aria-label="Farbraster: eine Spalte pro Zeichen, eine Reihe pro Codezeile"></div>
+  <figcaption>The color pixels, enlarged. Below: the same image clipped to text.</figcaption>
+  <div class="pixel-map" role="img" aria-label="Color grid: one column per character position, one row per line"></div>
   <pre class="pixel-shell"><code class="pixel-text">{sample}</code></pre>
-  <p class="pixel-status" aria-live="polite">Ohne JavaScript bleibt der Quelltext lesbar.</p>
+  <p class="pixel-status" aria-live="polite">Without JavaScript, the code remains readable.</p>
 </figure>
 <script>
   import { browserBackground } from '../../lib/pixel-highlighter/browser';
@@ -23,9 +23,9 @@ import './pixel.css';
       code.style.setProperty('--pixel-size', result.size);
       code.dataset.ready = '';
       map.style.backgroundImage = `url(${result.image})`;
-      status.textContent = `${result.width} × ${result.height} Pixel · 2 Elemente für den Codeblock · 0 Token-Spans`;
+      status.textContent = `${result.width} × ${result.height} pixels · 2 elements for the code block · 0 token spans`;
     } catch {
-      status.textContent = 'Das Bild konnte nicht erzeugt werden. Der Quelltext bleibt lesbar.';
+      status.textContent = 'The image could not be generated. The code remains readable.';
     }
   }
   document.querySelectorAll<HTMLElement>('[data-browser-demo]').forEach(renderDemo);

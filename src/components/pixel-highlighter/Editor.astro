@@ -3,9 +3,9 @@ import { sample } from '../../lib/pixel-highlighter/raster';
 import './pixel.css';
 ---
 <div class="pixel-demo" data-editor-demo>
-  <label for="pixel-editor">JavaScript ausprobieren · kleiner Demo-Tokenizer</label>
+  <label for="pixel-editor">Try editing JavaScript · small demo tokenizer</label>
   <div class="pixel-shell"><textarea id="pixel-editor" class="pixel-text" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="pixel-editor-status">{sample}</textarea></div>
-  <p id="pixel-editor-status" class="pixel-status" aria-live="polite">JavaScript lädt die Farben. Das Textfeld ist auch ohne JavaScript benutzbar.</p>
+  <p id="pixel-editor-status" class="pixel-status" aria-live="polite">JavaScript adds the colors. The text field also works without it.</p>
 </div>
 <script>
   import { browserBackground } from '../../lib/pixel-highlighter/browser';
@@ -24,11 +24,11 @@ import './pixel.css';
       editor.style.setProperty('--pixel-image', `url(${result.image})`);
       editor.style.setProperty('--pixel-size', result.size);
       editor.dataset.ready = '';
-      status.textContent = 'Farben aktiv · ASCII, keine Tabs · maximal 512 Spalten / 100 Zeilen';
+      status.textContent = 'Colors active · ASCII, no tabs · up to 512 columns / 100 lines';
     } catch (error) {
       if (version !== revision) return;
       delete editor.dataset.ready;
-      status.textContent = `${error instanceof Error ? error.message : 'Bild nicht verfügbar.'} Text bleibt bearbeitbar und einfarbig.`;
+      status.textContent = `${error instanceof Error ? error.message : 'Image unavailable.'} Text stays editable in a single color.`;
     }
   }
   function schedule() {

@@ -21,7 +21,7 @@ const german = post.data.lang === 'de';
     <a href="/" class="text-muted">{german ? '← Alle Beiträge' : '← All writing'}</a>
     <article class="mt-8">
       <header class="mb-8">
-        {post.data.draft && <p class="mb-4 text-muted">Entwurf · nur in der lokalen Vorschau sichtbar</p>}
+        {post.data.draft && <p class="mb-4 text-muted">{german ? 'Entwurf · nur in der lokalen Vorschau sichtbar' : 'Draft · visible only in the local preview'}</p>}
         <div class="mb-3 flex flex-wrap gap-x-3 text-muted">
           <time datetime={post.data.date.toISOString()}>{formatDate(post.data.date)}</time>
           <span aria-hidden="true">·</span>

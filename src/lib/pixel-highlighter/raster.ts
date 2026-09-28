@@ -8,13 +8,13 @@ repeat(42);`;
 
 export function rasterize(source: string) {
   if (/[^\x20-\x7e\n]/.test(source)) {
-    throw new Error('Dieses Beispiel unterstützt nur ASCII und Zeilenumbrüche, keine Tabs.');
+    throw new Error('This demo supports only printable ASCII and newlines, no tabs.');
   }
   const lines = source.split('\n');
   const width = Math.max(1, ...lines.map(line => line.length));
   const height = lines.length;
   if (width > 512 || height > 100) {
-    throw new Error('Demo-Limit: 512 Spalten und 100 Zeilen.');
+    throw new Error('Demo limit: 512 columns and 100 lines.');
   }
   const data = new Uint8Array(width * height * 4);
   // Comments, quoted strings, numbers, identifiers, then any remaining character.

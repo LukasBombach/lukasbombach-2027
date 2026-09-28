@@ -6,7 +6,7 @@ export function browserBackground(source: string) {
   canvas.width = width;
   canvas.height = height;
   const context = canvas.getContext('2d');
-  if (!context) throw new Error('Canvas ist nicht verfügbar.');
+  if (!context) throw new Error('Canvas is unavailable.');
   context.putImageData(new ImageData(new Uint8ClampedArray(data), width, height), 0, 0);
   return { image: canvas.toDataURL('image/png'), size, width, height };
 }
