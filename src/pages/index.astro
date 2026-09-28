@@ -1,13 +1,45 @@
 ---
+import portrait from '../assets/lukas-bombach.png';
 import Base from '../layouts/Base.astro';
 import Profile from '../components/Profile.astro';
 import PostRow from '../components/PostRow.astro';
 import Footer from '../components/Footer.astro';
 import { profile } from '../data/profile';
-import { getPublishedPosts } from '../lib/posts';
+import { getPublishedPosts, postUrl } from '../lib/posts';
 const posts = await getPublishedPosts();
+const homeUrl = new URL('/', Astro.site).href;
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  '@id': `${homeUrl}#profile`,
+  url: homeUrl,
+  name: `${profile.name} — Web Developer in Berlin`,
+  description: profile.about,
+  inLanguage: 'en',
+  hasPart: posts.map(post => ({
+    '@type': 'BlogPosting',
+    '@id': new URL(postUrl(post), Astro.site).href,
+    url: new URL(postUrl(post), Astro.site).href,
+    headline: post.data.title,
+    description: post.data.description,
+    datePublished: post.data.date.toISOString().slice(0, 10),
+    inLanguage: post.data.lang,
+    author: { '@id': `${homeUrl}#person` },
+  })),
+  mainEntity: {
+    '@type': 'Person',
+    '@id': `${homeUrl}#person`,
+    name: profile.name,
+    url: homeUrl,
+    image: new URL(portrait.src, Astro.site).href,
+    description: profile.about,
+    jobTitle: 'Web Developer',
+    sameAs: [...new Set([profile.github, ...profile.contacts.map(contact => contact.url)])],
+  },
+};
 ---
 <Base>
+  <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')} />
   <Profile home />
   <main id="main" tabindex="-1" class="mt-[55px] flex flex-col gap-[58px]">
     <section aria-labelledby="about-title">
@@ -15,7 +47,8 @@ const posts = await getPublishedPosts();
       <p>{profile.about}</p>
     </section>
     <section aria-labelledby="writing-title">
-      <h2 id="writing-title" class="section-title mb-[24.7px]">Writing</h2>
+      <h2 id="writing-title" class="section-title mb-1">Writing</h2>
+      <p class="mb-[24.7px]">Articles I’ve written, including pieces published on Medium and DEV Community.</p>
       {posts.length ? <ul class="flex flex-col gap-[24.7px]" role="list">{posts.map(post => <PostRow post={post} />)}</ul> : <p>New writing is on its way.</p>}
     </section>
   </main>

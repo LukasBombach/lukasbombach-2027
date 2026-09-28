@@ -2,6 +2,7 @@
 title: Syntax highlighting with just two elements
 description: Lorem ipsum dolor sit amet consectetur. Et egestas feugiat facilisis tincidunt amet. Quam ac convallis nisi mauris magna. In malesuada sem consequat elit malesuada.
 date: 2026-03-01
+draft: true
 gallery:
   - src: ../../assets/colorful-design.png
     alt: Colorful geometric shapes on a dark background

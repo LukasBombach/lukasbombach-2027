@@ -67,3 +67,7 @@
 @media (prefers-reduced-motion: no-preference) {
   a { transition: color 150ms ease; }
 }
+
+.post-link:hover { text-decoration: none; }
+.post-link:hover h3 { text-decoration: underline; }
+.post-link:hover .post-preview { background-color: var(--color-soft); }
