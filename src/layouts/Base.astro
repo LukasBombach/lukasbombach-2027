@@ -9,8 +9,9 @@ interface Props {
   article?: boolean;
   publishedAt?: Date;
   noindex?: boolean;
+  home?: boolean;
 }
-const { title = profile.name, description = profile.about, lang = 'en', article = false, publishedAt, noindex = false } = Astro.props;
+const { title = profile.name, description = profile.about, lang = 'en', article = false, publishedAt, noindex = false, home = false } = Astro.props;
 const pageTitle = title === profile.name ? `${profile.name} — Web Developer in Berlin` : `${title} — ${profile.name}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -36,6 +37,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
-    <div class="page-shell"><slot /></div>
+    <div class:list={["page-shell", { "home-shell": home }]}><slot /></div>
   </body>
 </html>

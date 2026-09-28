@@ -38,19 +38,18 @@ const structuredData = {
   },
 };
 ---
-<Base>
+<Base home>
   <script slot="head" is:inline type="application/ld+json" set:html={JSON.stringify(structuredData).replace(/</g, '\\u003c')} />
-  <Profile home />
-  <main id="main" tabindex="-1" class="mt-[55px] flex flex-col gap-[58px]">
-    <section aria-labelledby="about-title">
+  <div class="home-intro"><Profile home /></div>
+  <main id="main" tabindex="-1" class="home-main">
+    <section aria-labelledby="about-title" class="home-intro">
       <h2 id="about-title" class="section-title mb-1">About</h2>
       <p>{profile.about}</p>
     </section>
     <section aria-labelledby="writing-title">
-      <h2 id="writing-title" class="section-title mb-1">Writing</h2>
-      <p class="mb-[24.7px]">Articles I’ve written, including pieces published on Medium and DEV Community.</p>
-      {posts.length ? <ul class="flex flex-col gap-[24.7px]" role="list">{posts.map(post => <PostRow post={post} />)}</ul> : <p>New writing is on its way.</p>}
+      <h2 id="writing-title" class="sr-only">Writing</h2>
+      {posts.length ? <ul class="post-list" role="list">{posts.map(post => <PostRow post={post} />)}</ul> : <p>New writing is on its way.</p>}
     </section>
   </main>
-  <Footer />
+  <div class="home-intro"><Footer /></div>
 </Base>

@@ -5,34 +5,22 @@ import { formatDate, postUrl } from '../lib/posts';
 interface Props { post: CollectionEntry<'blog'>; }
 const { post } = Astro.props;
 const { title, description, date, externalUrl, source, gallery, preview } = post.data;
-const href = postUrl(post);
+const images = gallery.length ? gallery.slice(0, 3) : preview ? [{ src: preview.image, alt: preview.alt }] : [];
 ---
 <li>
   <article aria-labelledby={`title-${post.id}`}>
-    <a href={href} target={externalUrl ? '_blank' : undefined} rel={externalUrl ? 'noopener noreferrer' : undefined} aria-labelledby={`title-${post.id}`} class="post-link flex flex-col gap-[24.7px] rounded-lg">
-      <div class="timeline-row">
-        <time class="text-muted" datetime={date.toISOString()}>{formatDate(date)}</time>
-        <div class="min-w-0">
-          <h3 id={`title-${post.id}`} class="text-[14px] leading-[1.8]">
-            {title}{source && ` – on ${source}`}{externalUrl && <><span aria-hidden="true"> </span><img src="/images/external-link.svg" alt="" class="external-icon inline-block align-top" width="14" height="17" /><span class="sr-only"> (opens in a new tab)</span></>}
-          </h3>
-          <p>{description}</p>
-        </div>
-      </div>
-      {gallery.length > 0 && <div class="grid grid-cols-3 gap-[10px] pl-[130px] max-[540px]:pl-0">
-        {gallery.map(image => <div class="overflow-hidden rounded-lg border border-line">
-          <Image src={image.src} alt={image.alt} width={300} height={180} fit="cover" class="aspect-[5/3] h-auto w-full object-cover" loading="lazy" />
+    <a href={postUrl(post)} target={externalUrl ? '_blank' : undefined} rel={externalUrl ? 'noopener noreferrer' : undefined} aria-labelledby={`title-${post.id}`} class:list={['post-link', { 'post-text-only': !images.length }]}>
+      {images.length > 0 && <div class:list={['post-art', { 'post-art-stack': images.length > 1 }]}>
+        {images.map((image, imageIndex) => <div class="post-card" style={`--card-index: ${imageIndex}`}>
+          <Image src={image.src} alt={image.alt} width={440} class="post-image" loading="lazy" />
         </div>)}
       </div>}
-      {preview && <div class="pl-[130px] max-[540px]:pl-0">
-        <div class="post-preview flex h-[90px] overflow-hidden rounded-lg border border-line">
-          <Image src={preview.image} alt={preview.alt} width={304} height={180} fit="cover" class="h-full w-[152px] shrink-0 object-cover max-[400px]:w-[110px]" loading="lazy" />
-          <div class="flex min-w-0 flex-col justify-center px-5 max-[400px]:px-3">
-            <p class="line-clamp-2 text-ink leading-[1.4]">{preview.title}</p>
-            <p class="text-muted">{preview.readingTime}</p>
-          </div>
-        </div>
-      </div>}
+      <div class="post-copy">
+        <time class="post-date" datetime={date.toISOString()}>{formatDate(date)}</time>
+        <h3 id={`title-${post.id}`}>{title}</h3>
+        <p class="post-description">{description}</p>
+        {(source || preview) && <p class="post-meta">{source}{source && preview && <span aria-hidden="true"> · </span>}{preview?.readingTime}{externalUrl && <><img src="/images/external-link.svg" alt="" class="external-icon" width="14" height="17" /><span class="sr-only"> (opens in a new tab)</span></>}</p>}
+      </div>
     </a>
   </article>
 </li>

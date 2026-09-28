@@ -70,4 +70,38 @@
 
 .post-link:hover { text-decoration: none; }
 .post-link:hover h3 { text-decoration: underline; }
-.post-link:hover .post-preview { background-color: var(--color-soft); }
+
+
+.home-shell { max-width: 800px; }
+.home-intro { max-width: 648px; margin-inline: auto; }
+.home-main { margin-top: 55px; }
+.post-list { display: flex; flex-direction: column; gap: 90px; margin-top: 80px; margin-bottom: 70px; }
+.post-link { display: grid; grid-template-columns: 155px minmax(0, 1fr); align-items: center; gap: 40px; border-radius: 12px; }
+.post-text-only { grid-template-columns: minmax(0, 1fr); }
+.post-art { position: relative; display: grid; place-items: center; min-height: 180px; }
+.post-card { grid-area: 1 / 1; width: 133px; overflow: hidden; border-radius: 10px; background: var(--color-soft); transform: rotate(-5deg); box-shadow: 0 8px 24px rgb(0 0 0 / .08); border: 1px solid var(--color-line); }
+.post-image { display: block; width: 100%; height: 180px; object-fit: cover; }
+.post-art-stack .post-card { width: 110px; transform: translateX(calc((var(--card-index) - 1) * 20px)) rotate(calc(-9deg + var(--card-index) * 9deg)); }
+.post-art-stack .post-image { height: 167px; }
+.post-copy { min-width: 0; }
+.post-date { color: var(--color-muted); font-size: 14px; line-height: 1.8; }
+.post-copy h3 { font-size: 14px; line-height: 1.8; text-wrap: pretty; }
+.post-description { font-size: 14px; line-height: 1.8; margin-top: 8px; text-wrap: pretty; }
+.post-meta { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 13px; color: var(--color-muted); }
+
+@media (max-width: 760px) {
+  .post-list { gap: 90px; margin-top: 80px; margin-bottom: 70px; }
+  .post-link { grid-template-columns: 130px minmax(0, 1fr); gap: 30px; }
+  .post-card { width: 110px; }
+  .post-image { height: 160px; }
+  .post-art-stack .post-card { width: 90px; }
+  .post-art-stack .post-image { height: 143px; }
+  .post-art { min-height: 175px; }
+  .post-text-only { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 540px) {
+  .post-link { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .post-art { width: 150px; justify-self: start; }
+  .post-card { width: 110px; }
+  .post-image { height: 153px; }
+}
