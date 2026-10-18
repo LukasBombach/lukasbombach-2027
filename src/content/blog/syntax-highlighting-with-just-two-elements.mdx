@@ -6,16 +6,16 @@ lang: en
 draft: true
 ---
 
-import { Code } from 'astro:components';
-import BrowserDemo from '../../components/pixel-highlighter/Browser.astro';
-import EditorDemo from '../../components/pixel-highlighter/Editor.astro';
-import StaticDemo from '../../components/pixel-highlighter/Static.astro';
-import browserSource from '../../lib/pixel-highlighter/browser.ts?raw';
-import serverSource from '../../lib/pixel-highlighter/server.ts?raw';
-import rasterSource from '../../lib/pixel-highlighter/raster.ts?raw';
-import editorSource from '../../components/pixel-highlighter/Editor.astro?raw';
+import { Code } from "astro:components";
+import BrowserDemo from "../../components/pixel-highlighter/Browser.astro";
+import EditorDemo from "../../components/pixel-highlighter/Editor.astro";
+import StaticDemo from "../../components/pixel-highlighter/Static.astro";
+import browserSource from "../../lib/pixel-highlighter/browser.ts?raw";
+import serverSource from "../../lib/pixel-highlighter/server.ts?raw";
+import rasterSource from "../../lib/pixel-highlighter/raster.ts?raw";
+import editorSource from "../../components/pixel-highlighter/Editor.astro?raw";
 
-Syntax highlighters often wrap tokens in separate elements. Large code blocks can produce thousands of nodes for the browser to parse, style, and keep in memory. Editing may also require updating that structure.
+Syntax highlighters usually wrap tokens in separate elements. Large code blocks can produce thousands of nodes for the browser to parse, style, and keep in memory. Editing may also require updating that structure.
 
 I want to show a way to render syntax colors with just **two elements**, regardless of the number of tokens.
 
@@ -40,8 +40,8 @@ A tokenizer supplies the colors. Write them into a pixel buffer, then encode tha
 The demo uses a small, incomplete JavaScript tokenizer. A tokenizer such as Shiki can supply the colors instead.
 
 <details>
-<summary>Show the demo tokenizer and pixel buffer</summary>
-<Code code={rasterSource} lang="typescript" />
+  <summary>Show the demo tokenizer and pixel buffer</summary>
+  <Code code={rasterSource} lang="typescript" />
 </details>
 
 The code block itself is just:
@@ -60,8 +60,7 @@ code {
   white-space: pre;
   font-variant-ligatures: none;
   background-image: url("colors.png");
-  background-size: calc(var(--columns) * 1ch)
-                   calc(var(--lines) * 1.6em);
+  background-size: calc(var(--columns) * 1ch) calc(var(--lines) * 1.6em);
   background-repeat: no-repeat;
   image-rendering: pixelated;
   background-clip: text;
@@ -86,8 +85,8 @@ For static code, generate the image on the server or at build time. The browser 
 This block is generated during the Astro build. Its PNG is inlined as a data URL, so code in the first viewport needs no extra image request. The trade-off is larger HTML; a separate image file can be cached independently.
 
 <details>
-<summary>Show the server renderer</summary>
-<Code code={serverSource} lang="typescript" />
+  <summary>Show the server renderer</summary>
+  <Code code={serverSource} lang="typescript" />
 </details>
 
 > **Interactive placeholder — no JavaScript:** Open an isolated version with no scripts. Inspect the delivered HTML and compare an inline image with an external image request.
@@ -105,8 +104,8 @@ There is a catch: the new image needs time to decode. Wait until it is ready bef
 > **Interactive placeholder — image updates:** Compare immediate image swaps with decode-before-swap. Add artificial delay to expose the timing problem.
 
 <details>
-<summary>Show the editable demo</summary>
-<Code code={editorSource} lang="astro" />
+  <summary>Show the editable demo</summary>
+  <Code code={editorSource} lang="astro" />
 </details>
 
 ## Let the browser handle editing

@@ -35,6 +35,12 @@ haben; es ersetzt den Demo-Tokenizer, nicht die übrige Architektur.
 
 Das Dokument ist eine Arbeitsliste, keine bereits durchgeführte Validierung.
 
+## Gesammelte Quellen
+
+Die [Materialsammlung vom 18.10.2026](./syntax-highlighting-research.md) bündelt
+Implementierungen, Argumente und Hindernisse aus dem Projects-Ordner,
+einschließlich historischer Varianten seit 2023 und alternativer Git-Branches.
+
 ## Prüfung am 28.09.2026
 
 - `npm run build`: erfolgreich, Astro-Check ohne Fehler/Warnungen. Der Bundler
