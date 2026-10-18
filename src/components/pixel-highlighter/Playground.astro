@@ -1,0 +1,27 @@
+---
+import { sample } from '../../lib/pixel-highlighter/raster';
+import { serverBackground } from '../../lib/pixel-highlighter/server';
+import './pixel.css';
+import './article.css';
+const result = serverBackground(sample);
+---
+<figure class="pixel-figure pixel-wide" data-playground>
+  <div class="pixel-toolbar">
+    <label class="pixel-title" for="pixel-playground">Try the highlighter</label>
+    <div class="pixel-controls">
+      <label><span class="pixel-sr-only">Language</span><select data-language aria-label="Language"><option value="javascript">JavaScript</option><option value="typescript">TypeScript</option></select></label>
+      <label><span class="pixel-sr-only">Color theme</span><select data-theme aria-label="Color theme"><option value="dark">GitHub Dark</option><option value="light">GitHub Light</option></select></label>
+      <button type="button" data-reset>Reset</button>
+    </div>
+  </div>
+  <div class="pixel-surface" data-surface>
+    <textarea id="pixel-playground" class="pixel-text" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" aria-describedby="playground-help playground-state">{sample}</textarea>
+  </div>
+  <div class="pixel-readout"><span><strong>1</strong> textarea</span><span><strong>0</strong> token elements</span><span data-image-info>{result.width} × {result.height} px</span><a href="#color-layers" data-reveal>Reveal the layers ↓</a></div>
+  <figcaption id="playground-help">Edit, select, paste, undo. The text is native; only its colors come from an image.</figcaption>
+  <p class="pixel-status" id="playground-state" role="status">JavaScript adds the colors. Without it, this remains a native plain-text field.</p>
+</figure>
+<script>
+  import { initializeArticle } from '../../lib/pixel-highlighter/article';
+  initializeArticle();
+</script>

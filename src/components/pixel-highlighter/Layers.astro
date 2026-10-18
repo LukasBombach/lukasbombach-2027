@@ -1,0 +1,27 @@
+---
+import { sample } from '../../lib/pixel-highlighter/raster';
+import { serverBackground } from '../../lib/pixel-highlighter/server';
+const result = serverBackground(sample);
+---
+<figure class="pixel-figure pixel-wide" data-layers>
+  <div class="pixel-toolbar"><span class="pixel-title">One image. Real text.</span><button type="button" data-toggle-layers>Separate layers</button></div>
+  <div class="pixel-layer-stage" style="--split:0;--lift:0px;--tilt:0deg;--turn:0deg">
+    <div class="pixel-layer-stack">
+      <div class="pixel-plane pixel-color-plane" aria-hidden="true">
+        <span class="pixel-plane-label">Color image</span>
+        <div class="pixel-color-cells" style={`background-image:url(${result.image});background-size:${result.size}`}></div>
+        <span class="pixel-cell-marker"></span>
+      </div>
+      <div class="pixel-plane pixel-glyph-plane" aria-hidden="true">
+        <span class="pixel-plane-label">Text shape</span>
+        <pre><code class="pixel-text" data-ready style={`--pixel-image:url(${result.image});--pixel-size:${result.size}`}>{sample}</code></pre>
+        <span class="pixel-cell-marker"></span>
+      </div>
+    </div>
+  </div>
+  <div class="pixel-layer-controls">
+    <label for="layer-separation">Layer separation <output data-separation-value>0%</output></label><input id="layer-separation" type="range" min="0" max="100" value="0" />
+    <label for="layer-column">Inspect a cell <output data-cell-value>Column 7 · “m”</output></label><input id="layer-column" type="range" min="1" max={sample.split('\n')[0].length} value="7" />
+  </div>
+  <figcaption><span data-layer-info>One image pixel per text cell, scaled to 1ch × 1.6em.</span> The separated planes illustrate the mapping; they are not browser compositing layers. <span class="pixel-sr-only">The same selected column is outlined in both planes.</span></figcaption>
+</figure>

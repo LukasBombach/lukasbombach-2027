@@ -1,56 +1,58 @@
 ---
 title: Syntax highlighting with just two elements
-description: Put syntax colors in a tiny background image. Keep real text, use less DOM, and render code without client-side JavaScript.
+description: Store syntax colors in a pixel image. Keep real text, a constant number of elements, and native editing. An interactive exploration of the technique and its limits.
 date: 2026-09-28
 lang: en
 draft: true
 ---
 
-import { Code } from "astro:components";
-import BrowserDemo from "../../components/pixel-highlighter/Browser.astro";
-import EditorDemo from "../../components/pixel-highlighter/Editor.astro";
-import StaticDemo from "../../components/pixel-highlighter/Static.astro";
-import browserSource from "../../lib/pixel-highlighter/browser.ts?raw";
-import serverSource from "../../lib/pixel-highlighter/server.ts?raw";
-import rasterSource from "../../lib/pixel-highlighter/raster.ts?raw";
-import editorSource from "../../components/pixel-highlighter/Editor.astro?raw";
+import { Code } from 'astro:components';
+import Playground from '../../components/pixel-highlighter/Playground.astro';
+import Layers from '../../components/pixel-highlighter/Layers.astro';
+import Pipeline from '../../components/pixel-highlighter/Pipeline.astro';
+import Comparison from '../../components/pixel-highlighter/Comparison.astro';
+import Boundaries from '../../components/pixel-highlighter/Boundaries.astro';
+import Updates from '../../components/pixel-highlighter/Updates.astro';
+import StaticDemo from '../../components/pixel-highlighter/Static.astro';
+import browserSource from '../../lib/pixel-highlighter/browser.ts?raw';
+import serverSource from '../../lib/pixel-highlighter/server.ts?raw';
+import rasterSource from '../../lib/pixel-highlighter/raster.ts?raw';
 
-Syntax highlighters usually wrap tokens in separate elements. Large code blocks can produce thousands of nodes for the browser to parse, style, and keep in memory. Editing may also require updating that structure.
+A syntax highlighter can store its colors in a tiny image and leave the code as ordinary text. A static block needs only a `pre` and a `code`, regardless of how many tokens it contains. The same idea works on a native text field:
 
-I want to show a way to render syntax colors with just **two elements**, regardless of the number of tokens.
+<Playground />
 
-> **Visual placeholder — DOM comparison:** Show the same code with token spans and with this technique. Let the reader add lines and watch both element counts.
+There is no colored text overlay here. The image supplies the colors; the textarea supplies the letters and editing behavior.
 
-## Put the colors behind the text
+<h2 id="color-layers">Put the colors behind the letters</h2>
 
-Use a tiny image: one pixel per character position, one pixel row per line. Scale it to match a monospace font, then use `background-clip: text` to show the image only inside the letters.
+Separate the layers below. The lower plane holds a color for each character position. The upper plane supplies the shapes through which those colors are visible. Both follow the source and theme selected above.
 
-<BrowserDemo />
+<Layers />
 
-The image holds the colors. The letters are still real, selectable text.
+Each image pixel expands to one monospace cell: `1ch` wide and one line-height tall. With `image-rendering: pixelated`, neighboring colors stay distinct. `background-clip: text` restricts them to the letters. The text remains selectable HTML, not pixels drawn into a canvas.
 
-> **Interactive placeholder — reveal the layers:** Toggle between text, enlarged color pixels, and the combined result. A slider moves the image behind the letters to show why alignment matters.
+## From tokens to an image
 
-## Build the image
+Shiki supplies the tokens and their theme colors. Write those colors into an RGBA buffer, one row per source line, then encode it as a PNG. Inspect the actual intermediate data:
 
-A tokenizer supplies the colors. Write them into a pixel buffer, then encode that buffer as a PNG. Here is the browser renderer used above:
+<Pipeline />
 
-<Code code={browserSource} lang="typescript" />
+The tokenizer is unchanged in purpose. We replace the way its output reaches the screen. Canvas is just the browser's PNG encoder; it never draws the letters.
 
-The demo uses a small, incomplete JavaScript tokenizer. A tokenizer such as Shiki can supply the colors instead.
-
-<details>
-  <summary>Show the demo tokenizer and pixel buffer</summary>
+<details className="pixel-source-details">
+  <summary>Browser encoder and Shiki rasterizer</summary>
+  <Code code={browserSource} lang="typescript" />
   <Code code={rasterSource} lang="typescript" />
 </details>
 
-The code block itself is just:
+The static markup is simply:
 
 ```html
 <pre><code>const answer = 42;</code></pre>
 ```
 
-These are the core styles. Set `--columns` and `--lines` from the image dimensions:
+These are the essential alignment and clipping rules. The image dimensions supply `--columns` and `--lines`:
 
 ```css
 code {
@@ -60,7 +62,8 @@ code {
   white-space: pre;
   font-variant-ligatures: none;
   background-image: url("colors.png");
-  background-size: calc(var(--columns) * 1ch) calc(var(--lines) * 1.6em);
+  background-size: calc(var(--columns) * 1ch)
+                   calc(var(--lines) * 1.6em);
   background-repeat: no-repeat;
   image-rendering: pixelated;
   background-clip: text;
@@ -68,63 +71,64 @@ code {
 }
 ```
 
-Each image pixel covers one text cell. The demos also include readable fallbacks for missing images, printing, and forced colors.
+This is the core mechanism. The working demos also handle selection, unsupported input, image readiness, printing and forced colors.
 
-## The theme travels with the image
+## What changes when there are no token elements?
 
-No token classes or external theme stylesheet are needed. All syntax colors are in the image. Integration needs the original text, the image, and a few fixed CSS rules for alignment and clipping.
+A span renderer gives each token an element carrying its color. The image renderer keeps those colors outside the DOM. Increase the amount of code below; both sides use the same Shiki tokens and theme.
 
-> **Visual placeholder — integration:** Show the small HTML payload with its background image. Switch themes by replacing only the image.
+<Comparison />
 
-## Render it on the server
+The element count stays constant on the image side. The image dimensions and processing work still grow. Fewer elements alone do not establish that the full pipeline is faster.
 
-For static code, generate the image on the server or at build time. The browser needs no highlighting JavaScript for that block.
+The representation also changes integration: the image contains all token colors, so it needs no token classes or theme color stylesheet. Changing the theme replaces the image. Text metrics and clipping still require CSS.
+
+## Generate it before it reaches the browser
+
+For a static block, create the PNG on the server or during the build. This example already arrives as text and an inline image:
 
 <StaticDemo />
 
-This block is generated during the Astro build. Its PNG is inlined as a data URL, so code in the first viewport needs no extra image request. The trade-off is larger HTML; a separate image file can be cached independently.
+[Open the isolated example with no scripts](/experiments/pixel-highlighter/). Its highlighting remains when JavaScript is disabled.
 
-<details>
-  <summary>Show the server renderer</summary>
+An inline image needs no separate request but increases the HTML payload. An external file could be cached independently. Span highlighters can also render ahead of time; the distinctive properties here are the constant element count and the image carrying the colors.
+
+<details className="pixel-source-details">
+  <summary>Server encoder</summary>
   <Code code={serverSource} lang="typescript" />
 </details>
 
-> **Interactive placeholder — no JavaScript:** Open an isolated version with no scripts. Inspect the delivered HTML and compare an inline image with an external image request.
+## Editing adds a timing problem
 
-Span-based highlighters can also render on the server. Here, the difference is the small DOM and the image carrying the colors.
+A textarea already provides a caret, selection, copy and paste, and undo. Applying the color image directly avoids maintaining a second text layer. Each edit still requires a new image, and that image takes time to encode and decode.
 
-## Bonus: make it editable
+Keeping the old image puts its colors under the wrong letters. This experiment adds a controllable delay to make the mismatch visible:
 
-Apply the same background to a `textarea`, and update the image when its value changes. Try editing a string or number:
+<Updates />
 
-<EditorDemo />
+The editor at the top uses plain text while waiting, decodes the new image before applying it, and ignores results for older revisions. This prioritizes matching text and colors; it does not promise flicker-free editing across browsers. Composition input waits until composition ends before regenerating the image.
 
-There is a catch: the new image needs time to decode. Wait until it is ready before applying it, and discard results from older inputs. This demo shows plain text while waiting, so old colors do not drift across new text. Smoothness still needs testing across browsers.
+## Where the grid stops being enough
 
-> **Interactive placeholder — image updates:** Compare immediate image swaps with decode-before-swap. Add artificial delay to expose the timing problem.
+The simple mapping assumes one character per cell and one image row per visible line. Change those assumptions:
 
-<details>
-  <summary>Show the editable demo</summary>
-  <Code code={editorSource} lang="astro" />
-</details>
+<Boundaries />
 
-## Let the browser handle editing
+Wrapping requires a map of visual lines. Tabs need tab-stop expansion. Unicode needs a model of displayed columns, not `string.length`. Font metrics, spacing and ligatures must agree with the image. These demos highlight printable ASCII and newlines, up to 512 columns and 100 lines; other editor input falls back to readable plain text.
 
-The text field already handles the caret, selection, copy and paste, and undo. We update a background image instead of managing token elements or keeping a second text layer in sync.
+A color image also supplies no per-token bold or italic styles, links, or hover targets. Long lines widen the whole rectangular buffer, including the unused cells beside shorter lines.
 
-That could make small code editors much simpler. It does not provide every feature of a full editor.
+## Scope and evidence
 
-> **Interactive placeholder — native behavior:** Invite the reader to select text, paste several lines, and undo. Show that the editable surface remains one textarea.
+Static code display and small editable code fields are useful candidates: real text, no token elements, and a direct path from a tokenizer's colors to the browser. Rich editors would need additional solutions for layout, token interactions and large-document updates.
 
-## Where it gets harder
+<table className="pixel-findings">
+  <thead><tr><th>Established here</th><th>Still to evaluate</th></tr></thead>
+  <tbody>
+    <tr><td>Two elements per static block; no token spans</td><td>End-to-end speed and memory against the same tokenizer and input</td></tr>
+    <tr><td>Build-time PNG and script-free static output</td><td>Compressed transfer size, inline versus external images</td></tr>
+    <tr><td>Native textarea with versioned color updates</td><td>Safari/Firefox behavior, IME, zoom, screen readers and theme contrast</td></tr>
+  </tbody>
+</table>
 
-- **Line wrapping:** Width changes can move text onto new visual lines. The image must be recalculated to match.
-- **Tabs and Unicode:** Characters do not always occupy one cell. This demo supports printable ASCII and newlines; other input stays readable in plain text.
-- **Font metrics:** Line height, spacing, and image position must agree. Ligatures and font changes need care.
-- **Token features:** Colors alone cannot provide bold keywords, links, or hover targets. Theme changes need a new image.
-- **Large inputs:** Tokenization, PNG encoding, and painting still cost time. A long line makes the whole image wider. This demo limits highlighting to 512 columns and 100 lines.
-- **Browser behavior:** Scrolling, image failures, zoom, selection, and accessibility need testing on the target browsers.
-
-> **Interactive placeholder — break the grid:** Resize a code block, enable wrapping, and insert a tab or emoji. Show where the simple mapping stops working.
-
-The DOM stays small. Whether the whole pipeline is faster needs a fair benchmark with the same tokenizer and code. That is still an open question.
+A useful benchmark would separate tokenization, raster or HTML generation, PNG encoding, image decoding and painting. The demonstrations above establish the representation and its trade-offs. They leave the performance comparison open.

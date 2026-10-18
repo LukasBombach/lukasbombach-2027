@@ -1,0 +1,13 @@
+<figure class="pixel-figure" data-pipeline>
+  <div class="pixel-tabs" role="tablist" aria-label="Inspect the rendering pipeline">
+    <button type="button" role="tab" id="stage-source" aria-selected="true" aria-controls="pipeline-panel" data-stage="source">Source</button><span aria-hidden="true">→</span>
+    <button type="button" role="tab" id="stage-tokens" aria-selected="false" tabindex="-1" aria-controls="pipeline-panel" data-stage="tokens">Tokens</button><span aria-hidden="true">→</span>
+    <button type="button" role="tab" id="stage-pixels" aria-selected="false" tabindex="-1" aria-controls="pipeline-panel" data-stage="pixels">Pixels</button><span aria-hidden="true">→</span>
+    <button type="button" role="tab" id="stage-png" aria-selected="false" tabindex="-1" aria-controls="pipeline-panel" data-stage="png">PNG</button>
+  </div>
+  <div class="pixel-pipeline-panel" id="pipeline-panel" role="tabpanel" tabindex="0" aria-labelledby="stage-source">
+    <pre data-pipeline-code><code>The source and generated data appear here when JavaScript is available.</code></pre>
+    <div data-pipeline-picture hidden><img alt="Actual syntax color image, enlarged without smoothing" width="400" height="120" /><a data-png-download download="syntax-colors.png">Download this PNG</a></div>
+  </div>
+  <figcaption data-pipeline-caption>Inspect the actual data generated from the editor above.</figcaption>
+</figure>

@@ -1,0 +1,12 @@
+---
+import { sample } from '../../lib/pixel-highlighter/raster';
+---
+<figure class="pixel-figure pixel-wide" data-updates>
+  <div class="pixel-toolbar"><span class="pixel-title">When the image arrives later</span><button type="button" data-insert-line>Insert a line</button><label for="image-latency">Added latency <output data-latency-value>500 ms</output></label><input id="image-latency" type="range" min="0" max="1500" step="100" value="500" /></div>
+  <div class="pixel-comparison-grid">
+    <div><div class="pixel-panel-heading">Keep the old colors <span data-old-revision>Text 0 · image 0</span></div><pre class="pixel-update-code pixel-surface"><code class="pixel-text" data-old-colors>{sample}</code></pre></div>
+    <div><div class="pixel-panel-heading"><label for="update-editor">Use plain text while waiting</label><span data-new-revision>Text 0 · image 0</span></div><div class="pixel-surface"><textarea id="update-editor" class="pixel-text" wrap="off" spellcheck="false" aria-describedby="update-caption">{sample}</textarea></div></div>
+  </div>
+  <figcaption id="update-caption">Edit the right-hand field or insert a line. Both show the new text immediately. Only the left keeps an outdated color image during the added delay.</figcaption>
+  <p class="pixel-status" data-update-status role="status">A deliberate delay makes the mismatch visible. It is not a timing measurement.</p>
+</figure>
