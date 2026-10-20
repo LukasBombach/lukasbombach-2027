@@ -13,22 +13,9 @@ export function highlightedHtml(tokens: ColorToken[][]) {
   return `<pre><code>${content}</code></pre>`;
 }
 
-export function tokenMosaic(tokens: ColorToken[][]) {
-  const spans = tokens.flat().filter(token => token.content);
-  const columns = 64;
-  const width = columns * 3;
-  const height = Math.max(1, Math.ceil(spans.length / columns)) * 3;
-  const data = new Uint8Array(width * height * 4);
-  for (let p = 0; p < width * height; p++) data.set([13, 17, 23, 255], p * 4);
-  spans.forEach((token, i) => {
-    const rgb = [1, 3, 5].map(offset => parseInt(token.color.slice(offset, offset + 2), 16));
-    const x = i % columns * 3;
-    const y = Math.floor(i / columns) * 3;
-    for (let dy = 0; dy < 2; dy++) {
-      for (let dx = 0; dx < 2; dx++) data.set([...rgb, 255], ((y + dy) * width + x + dx) * 4);
-    }
-  });
-  return { width, height, data };
+export function domTextSize(text: string) {
+  const bytes = new TextEncoder().encode(text).byteLength;
+  return bytes < 1000 ? `${bytes} B` : `${(bytes / 1000).toFixed(1)} kB`;
 }
 
 export function initializeDomIntro(render: (source: string) => Rendering) {
@@ -37,21 +24,64 @@ export function initializeDomIntro(render: (source: string) => Rendering) {
   const slider = root.querySelector<HTMLInputElement>('input[type="range"]')!;
   const code = root.querySelector<HTMLElement>('[data-dom-source]')!;
   const html = root.querySelector<HTMLElement>('[data-dom-html]')!;
-  const image = root.querySelector<HTMLImageElement>('[data-dom-mosaic]')!;
+  const view = root.querySelector<HTMLElement>('[data-dom-html-view]')!;
+  const toggle = root.querySelector<HTMLButtonElement>('[data-dom-toggle-view]')!;
+  const zoomLabel = root.querySelector<HTMLOutputElement>('[data-dom-zoom]')!;
   const status = root.querySelector<HTMLElement>('[data-dom-status]')!;
   let lastLines = slider.value;
   let frame = 0;
+  let fitFrame = 0;
+
+  const fitHtml = () => {
+    if (view.dataset.view !== 'overview') return;
+    const width = view.clientWidth - 40;
+    const height = view.clientHeight - 32;
+    if (width <= 0 || height <= 0) return;
+    const fits = (zoom: number) => {
+      // Widen the unscaled text as we zoom out so it fills the available width.
+      // Wrapping changes only its display, never the serialized HTML.
+      html.style.setProperty('--dom-layout-width', `${width / zoom}px`);
+      html.style.setProperty('--dom-zoom', String(zoom));
+      return html.scrollHeight * zoom <= height;
+    };
+    let zoom = 1;
+    if (!fits(1)) {
+      let lower = 0.001;
+      let upper = 1;
+      for (let i = 0; i < 12; i++) {
+        const candidate = (lower + upper) / 2;
+        if (fits(candidate)) lower = candidate;
+        else upper = candidate;
+      }
+      zoom = lower;
+      fits(zoom);
+    }
+    zoomLabel.textContent = ` · All HTML · ${Math.round(zoom * 100)}% zoom`;
+  };
+  const queueFit = () => {
+    cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(fitHtml);
+  };
+  const setView = (overview: boolean) => {
+    view.dataset.view = overview ? 'overview' : 'read';
+    view.tabIndex = overview ? -1 : 0;
+    view.scrollTop = 0;
+    view.scrollLeft = 0;
+    toggle.textContent = overview ? 'Read HTML' : 'Show all HTML';
+    if (overview) fitHtml();
+    else zoomLabel.textContent = ' · 100% zoom';
+  };
+  toggle.addEventListener('click', () => setView(view.dataset.view !== 'overview'));
+  setView(true);
+  toggle.hidden = false;
+  zoomLabel.hidden = false;
+  new ResizeObserver(queueFit).observe(view);
+  void document.fonts.ready.then(queueFit);
   slider.disabled = false;
   const update = () => {
     try {
-      const result = render(domSource(+slider.value));
-      const mosaic = tokenMosaic(result.tokens);
-      const canvas = document.createElement('canvas');
-      canvas.width = mosaic.width; canvas.height = mosaic.height;
-      const context = canvas.getContext('2d');
-      if (!context) throw new Error('Canvas unavailable.');
-      context.putImageData(new ImageData(new Uint8ClampedArray(mosaic.data), mosaic.width, mosaic.height), 0, 0);
-      const png = canvas.toDataURL('image/png');
+      const source = domSource(+slider.value);
+      const result = render(source);
       const fragment = document.createDocumentFragment();
       result.tokens.forEach((line, y) => {
         for (const token of line) {
@@ -71,8 +101,9 @@ export function initializeDomIntro(render: (source: string) => Rendering) {
       root.querySelector('[data-dom-spans]')!.textContent = count.toLocaleString('en');
       root.querySelector('[data-dom-total]')!.textContent = elements.toLocaleString('en');
       html.textContent = highlightedHtml(result.tokens);
-      image.src = png; image.width = mosaic.width; image.height = mosaic.height;
-      image.alt = `${count.toLocaleString('en')} squares, one per token span in the highlighted block`;
+      root.querySelector('[data-dom-code-size]')!.textContent = domTextSize(source);
+      root.querySelector('[data-dom-html-size]')!.textContent = domTextSize(html.textContent);
+      fitHtml();
       lastLines = slider.value;
       status.textContent = `${slider.value} ${slider.value === '1' ? 'line of code creates' : 'lines of code create'} ${count.toLocaleString('en')} token spans and ${elements.toLocaleString('en')} elements in this renderer.`;
     } catch {

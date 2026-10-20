@@ -139,3 +139,25 @@ einschließlich historischer Varianten seit 2023 und alternativer Git-Branches.
   Screenshot: output/playwright/dom-html-slider-final.png.
 - npm run build erfolgreich; Astro-Check ohne Fehler/Warnungen. Die bekannten
   MDX-Directive- und Chunkgrößen-Warnungen des Bundlers bleiben bestehen.
+
+## HTML-Gesamtansicht am 20.10.2026
+
+- Die Token-Punktgrafik im ersten Widget ist entfernt, einschließlich ihres
+  Encoders und der zugehörigen Styles. Code, HTML und Elementzählung bleiben.
+- Standardmäßig wird das vollständige HTML auf die rechte Fläche skaliert.
+  Die verfügbare Breite und die tatsächliche Texthöhe bestimmen den Zoom;
+  ResizeObserver passt ihn bei Größenänderungen erneut an. Es gibt keine
+  Übergangsanimation und keine Kürzung der Ausgabe.
+- „Read HTML“ wechselt zu normal großer Schrift und einer per Tastatur
+  scrollbareren Region; „Show all HTML“ stellt die Gesamtansicht wieder her.
+  Ohne Initialisierung bleibt das serverseitige HTML normal lesbar.
+- Die Größenangaben zählen die echten UTF-8-Bytes von Quelltext und HTML vor
+  Kompression. Bei 100 Beispielzeilen sind das 3,7 kB und 59,7 kB.
+- Im Browser bei 1440 und 390 px geprüft: vollständige Ausgabe innerhalb des
+  Rahmens für 1, 10 bzw. 100 Zeilen; keine horizontale Seitenüberbreite.
+  Bei 100 Zeilen ca. 9 % bzw. 7 % Zoom. Der Text enthält keine Kind-Elemente
+  und ergibt nach Entfernen der Markup-Tags wieder den Originalcode.
+- Beide Ansichtswechsel und Scrollen bis zum HTML-Ende per Tastatur geprüft.
+  Die HTML-Zeichenfolge bleibt dabei unverändert; zurück in der Gesamtansicht
+  ist die Scrollposition null. Screenshots unter output/playwright/:
+  dom-html-overview-desktop.png und dom-html-overview-mobile.png.

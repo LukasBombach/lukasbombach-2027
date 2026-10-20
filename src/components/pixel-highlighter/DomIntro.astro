@@ -1,15 +1,13 @@
 ---
-import { Buffer } from 'node:buffer';
-import { encode } from 'fast-png';
 import { rasterize } from '../../lib/pixel-highlighter/raster';
-import { domSource, highlightedHtml, tokenMosaic } from '../../lib/pixel-highlighter/dom-intro';
+import { domSource, domTextSize, highlightedHtml } from '../../lib/pixel-highlighter/dom-intro';
 import './article.css';
 
 const lines = 10;
-const result = rasterize(domSource(lines));
+const source = domSource(lines);
+const result = rasterize(source);
 const spans = result.tokens.flat().filter(token => token.content).length;
-const mosaic = tokenMosaic(result.tokens);
-const image = `data:image/png;base64,${Buffer.from(encode({ ...mosaic, channels: 4 })).toString('base64')}`;
+const html = highlightedHtml(result.tokens);
 ---
 <figure id="dom-overhead" class="pixel-figure pixel-wide pixel-dom-intro" data-dom-intro>
   <div class="pixel-toolbar">
@@ -23,10 +21,20 @@ const image = `data:image/png;base64,${Buffer.from(encode({ ...mosaic, channels:
     <div><strong data-dom-total>{(spans + 2).toLocaleString('en')}</strong><span>elements in the block</span></div>
   </div>
   <div class="pixel-dom-views">
-    <div><p>Highlighted code</p><pre class="pixel-dom-source"><code data-dom-source>{result.tokens.map((line, y) => <Fragment>{line.filter(token => token.content).map(token => <span style={`color:${token.color}`}>{token.content}</span>)}{y < result.tokens.length - 1 ? '\n' : ''}</Fragment>)}</code></pre></div>
-    <div><p>Generated HTML <span>(plain text)</span></p><pre class="pixel-dom-html" data-dom-html>{highlightedHtml(result.tokens)}</pre></div>
+    <div>
+      <div class="pixel-dom-heading"><div><p>Highlighted code</p><small data-dom-code-size>{domTextSize(source)}</small></div></div>
+      <pre class="pixel-dom-source"><code data-dom-source>{result.tokens.map((line, y) => <Fragment>{line.filter(token => token.content).map(token => <span style={`color:${token.color}`}>{token.content}</span>)}{y < result.tokens.length - 1 ? '\n' : ''}</Fragment>)}</code></pre>
+    </div>
+    <div>
+      <div class="pixel-dom-heading">
+        <div><p>Generated HTML</p><small><span data-dom-html-size>{domTextSize(html)}</span><output data-dom-zoom hidden></output></small></div>
+        <button type="button" data-dom-toggle-view aria-controls="dom-intro-html-view" hidden>Read HTML</button>
+      </div>
+      <div id="dom-intro-html-view" class="pixel-dom-html-view" data-dom-html-view data-view="read" role="region" aria-label="Generated HTML" tabindex="0">
+        <pre class="pixel-dom-html" data-dom-html>{html}</pre>
+      </div>
+    </div>
   </div>
-  <div class="pixel-dom-mosaic"><p>One square for every token span</p><img data-dom-mosaic src={image} width={mosaic.width} height={mosaic.height} alt={`${spans} squares, one per token span in the highlighted block`} /></div>
-  <figcaption>The HTML view contains every span and its color style, without abbreviation. Counts include <code>pre</code> and <code>code</code>; text nodes and this diagram are excluded. Other highlighters may add line wrappers too.</figcaption>
+  <figcaption>The full HTML scales to fit. Choose “Read HTML” for normal-size text. Counts cover only <code>pre</code>, <code>code</code> and token spans; sizes are uncompressed UTF-8. Other highlighters may add line wrappers too.</figcaption>
   <p class="pixel-sr-only" data-dom-status role="status">{lines} lines of code create {spans} token spans and {spans + 2} elements in this renderer.</p>
 </figure>
