@@ -1,7 +1,10 @@
 # Interaktiver Syntax-Highlighting-Artikel
 
-Ein benutzbarer Editor führt Entwickler unterschiedlicher Vorkenntnisse zum
-räumlichen Erklärmodell, danach zu Architektur, Nutzen, Grenzen und Evidenz.
+Der Einstieg zeigt zunächst das Problem: tatsächlicher Span-DOM, vollständiges
+HTML als Klartext und ein Quadrat je Token-Element machen die Größenordnung
+sichtbar. Ein Slider erhöht die Code-Menge von 1 bis 100 Zeilen. Erst dann folgen
+die Zwei-Elemente-Idee, ein benutzbarer Editor und
+das räumliche Erklärmodell, danach Architektur, Nutzen, Grenzen und Evidenz.
 
 Bestehende Bloggestaltung: Inter für Text, System-Monospace für Code und
 Messwerte. Fließtext bleibt in der 600-px-Spalte, Abbildungen bis 860 px breit.

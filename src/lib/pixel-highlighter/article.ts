@@ -1,4 +1,5 @@
 import type { Language, Options, Theme } from './raster';
+import { initializeDomIntro } from './dom-intro';
 
 type Rendering = ReturnType<(typeof import('./browser'))['browserBackground']>;
 const get = <T extends Element = HTMLElement>(root: ParentNode, selector: string) => {
@@ -35,6 +36,7 @@ export async function initializeArticle() {
   try {
     // Load the real tokenizer separately from the article controls and HTML.
     const { browserBackground } = await import('./browser');
+    initializeDomIntro(browserBackground);
     const layers = get<HTMLElement>(document, '[data-layers]');
     const pipeline = get<HTMLElement>(document, '[data-pipeline]');
     const comparison = get<HTMLElement>(document, '[data-comparison]');

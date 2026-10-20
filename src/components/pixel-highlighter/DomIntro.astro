@@ -1,0 +1,32 @@
+---
+import { Buffer } from 'node:buffer';
+import { encode } from 'fast-png';
+import { rasterize } from '../../lib/pixel-highlighter/raster';
+import { domSource, highlightedHtml, tokenMosaic } from '../../lib/pixel-highlighter/dom-intro';
+import './article.css';
+
+const lines = 10;
+const result = rasterize(domSource(lines));
+const spans = result.tokens.flat().filter(token => token.content).length;
+const mosaic = tokenMosaic(result.tokens);
+const image = `data:image/png;base64,${Buffer.from(encode({ ...mosaic, channels: 4 })).toString('base64')}`;
+---
+<figure id="dom-overhead" class="pixel-figure pixel-wide pixel-dom-intro" data-dom-intro>
+  <div class="pixel-toolbar">
+    <span class="pixel-title">How much DOM does highlighting add?</span>
+    <label for="dom-intro-lines">Lines of code <output for="dom-intro-lines" data-dom-line-value>{lines}</output></label>
+    <input id="dom-intro-lines" type="range" min="1" max="100" step="1" value={lines} aria-label="Lines of code" disabled />
+  </div>
+  <div class="pixel-dom-totals">
+    <div><strong data-dom-lines>{lines}</strong><span data-dom-line-label>lines of code</span></div>
+    <div><strong data-dom-spans>{spans.toLocaleString('en')}</strong><span>token spans</span></div>
+    <div><strong data-dom-total>{(spans + 2).toLocaleString('en')}</strong><span>elements in the block</span></div>
+  </div>
+  <div class="pixel-dom-views">
+    <div><p>Highlighted code</p><pre class="pixel-dom-source"><code data-dom-source>{result.tokens.map((line, y) => <Fragment>{line.filter(token => token.content).map(token => <span style={`color:${token.color}`}>{token.content}</span>)}{y < result.tokens.length - 1 ? '\n' : ''}</Fragment>)}</code></pre></div>
+    <div><p>Generated HTML <span>(plain text)</span></p><pre class="pixel-dom-html" data-dom-html>{highlightedHtml(result.tokens)}</pre></div>
+  </div>
+  <div class="pixel-dom-mosaic"><p>One square for every token span</p><img data-dom-mosaic src={image} width={mosaic.width} height={mosaic.height} alt={`${spans} squares, one per token span in the highlighted block`} /></div>
+  <figcaption>The HTML view contains every span and its color style, without abbreviation. Counts include <code>pre</code> and <code>code</code>; text nodes and this diagram are excluded. Other highlighters may add line wrappers too.</figcaption>
+  <p class="pixel-sr-only" data-dom-status role="status">{lines} lines of code create {spans} token spans and {spans + 2} elements in this renderer.</p>
+</figure>

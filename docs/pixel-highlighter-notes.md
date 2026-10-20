@@ -103,3 +103,39 @@ einschließlich historischer Varianten seit 2023 und alternativer Git-Branches.
 - Offen: faire Performance-/Transfermessungen, Safari, vollständige Firefox-
   Matrix, echte IME-/Screenreader-Prüfung, Zoom, Druck/Forced Colors und eine
   praktische Prüfung des Reduced-Motion-Pfads.
+
+## Einleitung am 19.10.2026
+
+- Einstieg auf Problem → Größenordnung → Kosten → Zwei-Elemente-Methode geändert.
+- `DomIntro.astro` zeigt echten Span-Code, einen DOM-Baum-Auszug und ein Quadrat
+  pro Token-Span. Ausgangsdaten und Grafik werden bereits serverseitig erzeugt.
+  `dom-intro.ts` aktualisiert die Grafik für 10, 50 oder 100 Beispielzeilen.
+- Im Browser gegen den tatsächlichen DOM abgeglichen: 10 Zeilen = 160 Spans /
+  162 Elemente, 50 Zeilen = 800 / 802, 100 Zeilen = 1.600 / 1.602. Textknoten und
+  Darstellungs-DOM des Diagramms werden ausdrücklich nicht mitgezählt.
+- Desktop bei 1280 px und schmale Darstellung bei 497 px visuell geprüft;
+  keine horizontale Seitenüberbreite. Der DOM-Auszug einschließlich der Zahl
+  weiterer Spans passt vollständig in seinen Bereich.
+- `npm run build` erfolgreich, Astro-Check ohne Fehler/Warnungen; die bekannten
+  MDX-Directive- und Chunkgrößen-Warnungen bleiben. Design-Lint meldet nur die
+  bereits begründeten Clipping-/Fallback-Gradienten.
+- Der Text erklärt Speicher, Style-Auflösung, Layout und Editor-Updates als
+  Kostenfaktoren; keine Gleichsetzung von Elementzahl und gemessener Laufzeit.
+
+## HTML-Ansicht und Slider am 20.10.2026
+
+- Im ersten Widget ersetzt ein Slider für 1–100 Codezeilen die feste Auswahl.
+  Code, Zähler, HTML und Token-Grafik aktualisieren sich beim Verschieben;
+  aufeinanderfolgende Eingaben werden über requestAnimationFrame gebündelt.
+- Rechts steht das vollständige HTML als Klartext, einschließlich aller Spans
+  und Farbstile. Lange Zeilen brechen visuell um; der Bereich ist scrollbar.
+  Die initiale Darstellung wird weiterhin serverseitig erzeugt.
+- Browserprüfung: 1 Zeile = 16 Spans / 18 Elemente; 100 Zeilen = 1.600 Spans /
+  1.602 Elemente. Die HTML-Ansicht enthält genau so viele Span-Tags und selbst
+  keine Kind-Elemente. Zähler, Sliderwert und Beschriftung stimmen überein.
+- Node-Prüfung für 1, 10 und 100 Zeilen: vollständige HTML-Struktur, sämtliche
+  Tokens und unveränderter Quelltext. Escaping von Text und Farbattribut geprüft.
+- Darstellung bei 497 und 1280 px angesehen, ohne horizontalen Seitenüberlauf.
+  Screenshot: output/playwright/dom-html-slider-final.png.
+- npm run build erfolgreich; Astro-Check ohne Fehler/Warnungen. Die bekannten
+  MDX-Directive- und Chunkgrößen-Warnungen des Bundlers bleiben bestehen.

@@ -7,6 +7,7 @@ draft: true
 ---
 
 import { Code } from 'astro:components';
+import DomIntro from '../../components/pixel-highlighter/DomIntro.astro';
 import Playground from '../../components/pixel-highlighter/Playground.astro';
 import Layers from '../../components/pixel-highlighter/Layers.astro';
 import Pipeline from '../../components/pixel-highlighter/Pipeline.astro';
@@ -18,7 +19,15 @@ import browserSource from '../../lib/pixel-highlighter/browser.ts?raw';
 import serverSource from '../../lib/pixel-highlighter/server.ts?raw';
 import rasterSource from '../../lib/pixel-highlighter/raster.ts?raw';
 
-A syntax highlighter can store its colors in a tiny image and leave the code as ordinary text. A static block needs only a `pre` and a `code`, regardless of how many tokens it contains. The same idea works on a native text field:
+Most syntax highlighters put colors on the page by wrapping tokens in DOM elements, usually `span` elements. A keyword gets an element, a number gets another, and so on. A few lines of code can become hundreds of elements. Increase the example below to see how that adds up:
+
+<DomIntro />
+
+Those elements have a cost. The browser has to create them, resolve their styles, lay out the text and keep the structure in memory. An editor also needs to update that structure as the code changes. The cost depends on the input, CSS and browser; the element count alone is not a performance measurement.
+
+## Two elements for the whole block
+
+We can move the syntax colors into a tiny image and keep the code as ordinary text. The static block then needs only a `pre` and a `code`, regardless of the number of tokens. For the 100-line example above, that is **2 elements instead of 1,602**. The same technique can color a single native text field:
 
 <Playground />
 
